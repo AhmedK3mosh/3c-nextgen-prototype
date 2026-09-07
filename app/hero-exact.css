@@ -1,7 +1,10 @@
-.hero-kids{position:relative!important;height:310px!important;margin:0 -4px 2px!important;background-image:url('/hero-kids-final.webp?direct=20260907-2')!important;background-position:center bottom!important;background-size:contain!important;background-repeat:no-repeat!important;overflow:visible!important;isolation:isolate!important;filter:drop-shadow(0 18px 18px rgba(9,38,96,.14))!important}
+.hero-kids{position:relative!important;height:310px!important;margin:0 -4px 2px!important;background:none!important;overflow:visible!important;isolation:isolate!important;filter:none!important}
 .hero-kids:before{content:""!important;position:absolute!important;inset:20px 8px 6px!important;border-radius:46% 54% 42% 48%!important;background:radial-gradient(circle at 50% 58%,rgba(38,199,244,.22) 0,rgba(71,141,255,.10) 38%,rgba(113,87,255,.06) 58%,transparent 74%)!important;filter:blur(2px);z-index:0!important;pointer-events:none!important;animation:heroAura 5.5s ease-in-out infinite!important}
 .hero-kids:after{display:none!important;content:none!important}
 .hero-kids .kid-card,.hero-kids .kid-face,.hero-kids .hoodie,.hero-kids .hero-glow,.hero-kids .float-tile{display:none!important}
+.hero-kids-direct{background:none!important;display:flex!important;align-items:flex-end!important;justify-content:center!important}
+.hero-kids-direct .hero-kids-image{display:block!important;position:relative!important;z-index:20!important;width:min(104%,390px)!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;opacity:1!important;visibility:visible!important;filter:drop-shadow(0 18px 18px rgba(9,38,96,.14))!important;animation:heroImageFloat 4.4s ease-in-out infinite!important}
+@keyframes heroImageFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.008)}}
 @keyframes heroAura{0%,100%{transform:scale(.98);opacity:.78}50%{transform:scale(1.04);opacity:1}}
-@media (max-width:420px){.hero-kids{height:300px!important;background-size:104% auto!important;background-position:center bottom!important}}
-@media (prefers-reduced-motion:reduce){.hero-kids:before{animation:none!important}}
+@media (max-width:420px){.hero-kids{height:300px!important}.hero-kids-direct .hero-kids-image{width:min(108%,390px)!important;height:100%!important}}
+@media (prefers-reduced-motion:reduce){.hero-kids:before,.hero-kids-direct .hero-kids-image{animation:none!important}}
