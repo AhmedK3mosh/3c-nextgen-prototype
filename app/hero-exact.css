@@ -1,21 +1,12 @@
 .hero-kids{position:relative!important;height:310px!important;margin:0 -4px 2px!important;background:none!important;overflow:visible!important;isolation:isolate!important}
 .hero-kids:before{content:""!important;position:absolute!important;inset:20px 8px 6px!important;border-radius:46% 54% 42% 48%!important;background:radial-gradient(circle at 50% 58%,rgba(38,199,244,.34) 0,rgba(71,141,255,.18) 36%,rgba(113,87,255,.11) 56%,transparent 73%)!important;filter:blur(2px);z-index:0!important;animation:heroAura 5.5s ease-in-out infinite!important}
-.hero-kids:after{content:""!important;position:absolute!important;left:50%!important;bottom:0!important;width:min(94%,350px)!important;height:292px!important;transform:translateX(-50%)!important;background:url('/hero-children-exact.png') center bottom/contain no-repeat!important;z-index:5!important;pointer-events:none!important;filter:drop-shadow(0 18px 18px rgba(9,38,96,.16))!important;animation:heroArtwork 4.4s ease-in-out infinite!important;transform-origin:50% 100%!important}
+.hero-kids:after{content:""!important;position:absolute!important;left:50%!important;bottom:0!important;width:min(98%,365px)!important;height:300px!important;transform:translateX(-50%)!important;background:url('/hero-children-exact.png') center bottom/contain no-repeat!important;z-index:6!important;pointer-events:none!important;filter:drop-shadow(0 18px 18px rgba(9,38,96,.16))!important;animation:heroArtwork 4.4s ease-in-out infinite!important;transform-origin:50% 100%!important}
 
-/* Keep a polished fallback trio visible underneath the artwork.
-   This prevents an empty hero if a generated image is transparent, cached incorrectly, or unavailable. */
-.hero-kids .kid-card{display:flex!important;position:absolute!important;align-items:flex-end!important;justify-content:center!important;bottom:8px!important;z-index:2!important;filter:drop-shadow(0 14px 16px rgba(9,38,96,.14))}
-.hero-kids .kid-face{display:block!important;line-height:1!important;filter:none!important}
-.hero-kids .hoodie{display:grid!important}
-.hero-kids .hero-glow{display:block!important;z-index:1!important}
-.hero-kids .kid-main{left:50%!important;transform:translateX(-50%)!important;width:154px!important;height:238px!important;z-index:3!important}
-.hero-kids .kid-main .kid-face{font-size:112px!important;transform:translateY(-40px)!important}
-.hero-kids .kid-main .hoodie{left:50%!important;transform:translateX(-50%)!important;bottom:12px!important;width:82px!important;height:92px!important;border-radius:34px 34px 18px 18px!important;background:linear-gradient(160deg,#106dff,#0a2f83)!important;box-shadow:0 12px 28px rgba(9,64,157,.28)!important}
-.hero-kids .kid-small{width:104px!important;height:178px!important;bottom:10px!important;z-index:2!important}
-.hero-kids .kid-small .kid-face{font-size:78px!important;transform:translateY(-5px)!important}
-.hero-kids .kid-left{left:18px!important;transform:rotate(-4deg)!important}
-.hero-kids .kid-right{right:18px!important;transform:rotate(4deg)!important}
-.hero-kids .hero-glow{position:absolute!important;left:50%!important;bottom:7px!important;transform:translateX(-50%)!important;width:270px!important;height:220px!important;border-radius:50%!important;background:radial-gradient(circle,rgba(105,218,255,.38) 0,rgba(101,112,255,.13) 54%,transparent 73%)!important}
+/* The supplied hero artwork is the source of truth. Do not mix emoji fallback characters into it. */
+.hero-kids .kid-card,
+.hero-kids .kid-face,
+.hero-kids .hoodie,
+.hero-kids .hero-glow{display:none!important}
 
 .hero-kids .float-tile{z-index:8!important;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.62);box-shadow:0 12px 26px rgba(20,93,190,.20)!important}
 .hero-kids .tile-code{left:8px!important;top:54px!important}
@@ -24,5 +15,5 @@
 
 @keyframes heroArtwork{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}50%{transform:translateX(-50%) translateY(-5px) scale(1.008)}}
 @keyframes heroAura{0%,100%{transform:scale(.98);opacity:.78}50%{transform:scale(1.04);opacity:1}}
-@media (max-width:420px){.hero-kids{height:300px!important}.hero-kids:after{height:282px!important}.hero-kids .kid-left{left:10px!important}.hero-kids .kid-right{right:10px!important}}
-@media (prefers-reduced-motion:reduce){.hero-kids:before,.hero-kids:after,.hero-kids .float-tile,.hero-kids .kid-card{animation:none!important}}
+@media (max-width:420px){.hero-kids{height:300px!important}.hero-kids:after{width:min(100%,355px)!important;height:292px!important}}
+@media (prefers-reduced-motion:reduce){.hero-kids:before,.hero-kids:after,.hero-kids .float-tile{animation:none!important}}
