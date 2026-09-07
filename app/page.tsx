@@ -1,303 +1,205 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, Bot, Brain, CheckCircle2, Code2, Gamepad2, Home,
-  Lightbulb, Rocket, Sparkles, Trophy, UserRound, UsersRound
+  ArrowLeft, ArrowRight, BarChart3, Bot, Brain, Check, CheckCircle2, ChevronLeft,
+  Code2, Crown, Gamepad2, Home, Lightbulb, LockKeyhole, Medal, Play, Rocket,
+  Sparkles, Star, Target, Trophy, UserRound, UsersRound, X
 } from "lucide-react";
 
 type Screen = "landing" | "assessment" | "profile" | "path" | "today" | "coach" | "projects" | "parent";
 type Answers = { age?: string; interest?: string; level?: string };
 
-const interestTracks: Record<string, string> = {
-  games: "Python + تطوير الألعاب",
-  ai: "Python + الذكاء الاصطناعي",
-  web: "Python + تطوير الويب",
-  data: "Python + تحليل البيانات"
+const tracks: Record<string, { title: string; subtitle: string }> = {
+  games: { title: "Python + تطوير الألعاب", subtitle: "من المنطق البرمجي إلى بناء ألعاب Pygame" },
+  ai: { title: "Python + الذكاء الاصطناعي", subtitle: "Python ثم AI/ML ومشاريع Teachable Machine" },
+  web: { title: "Python + تطوير الويب", subtitle: "أساس قوي ثم HTML, CSS, JavaScript" },
+  data: { title: "Python + تحليل البيانات", subtitle: "أساسيات البرمجة ثم Data Science" }
 };
 
-function Skill({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-sm">
-        <span>{label}</span><b>{value}%</b>
-      </div>
-      <div className="progress"><span style={{ width: `${value}%` }} /></div>
-    </div>
-  );
+const packages = [
+  { name: "Quarter", months: "3 شهور", levels: "مستوى واحد", price: "3,950", old: "5,900", badge: "بداية مرنة" },
+  { name: "Half Annual", months: "6 شهور", levels: "مستويان", price: "6,950", old: "10,800", badge: "الأكثر توازنًا" },
+  { name: "Annual", months: "12 شهر", levels: "4 مستويات", price: "11,800", old: "18,800", badge: "أفضل قيمة" }
+];
+
+function Logo() {
+  return <div className="brand-logo" aria-label="3C"><span>3</span><span>C</span></div>;
+}
+
+function Skill({ label, value, tone = "blue" }: { label: string; value: number; tone?: "blue" | "cyan" | "green" | "orange" }) {
+  return <div className="skill-row">
+    <div className="skill-meta"><span>{label}</span><b>{value}%</b></div>
+    <div className="skill-track"><span className={`skill-fill ${tone}`} style={{ width: `${value}%` }} /></div>
+  </div>;
+}
+
+function TopBar({ title, subtitle, onBack }: { title: string; subtitle?: string; onBack?: () => void }) {
+  return <div className="topbar">
+    <div className="topbar-copy"><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>
+    {onBack ? <button className="icon-button" onClick={onBack} aria-label="رجوع"><ChevronLeft size={20}/></button> : <Logo/>}
+  </div>;
 }
 
 export default function HomePage() {
   const [screen, setScreen] = useState<Screen>("landing");
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<Answers>({});
-  const [coachText, setCoachText] = useState("لاحظت مشكلة بسيطة 👀. المفتاح المستخدم لا يطابق اسم المفتاح الموجود داخل القاموس.");
   const [notice, setNotice] = useState("");
+  const [coachText, setCoachText] = useState("وجدت مشكلة صغيرة 👀 — اسم المفتاح في السطر الأخير لا يطابق المفتاح الموجود داخل القاموس.");
+  const [packagesOpen, setPackagesOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState("Half Annual");
 
-  const recommendedTrack = useMemo(
-    () => interestTracks[answers.interest || "games"] || interestTracks.games,
-    [answers.interest]
-  );
+  const track = useMemo(() => tracks[answers.interest || "games"] ?? tracks.games, [answers.interest]);
+  const go = (s: Screen) => { setNotice(""); setScreen(s); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const reset = () => { setScreen("landing"); setStep(1); setAnswers({}); setNotice(""); setPackagesOpen(false); };
 
-  const select = (key: keyof Answers, value: string) =>
-    setAnswers(prev => ({ ...prev, [key]: value }));
-
-  const reset = () => {
-    setScreen("landing");
-    setStep(1);
-    setAnswers({});
-    setNotice("");
-    setCoachText("لاحظت مشكلة بسيطة 👀. المفتاح المستخدم لا يطابق اسم المفتاح الموجود داخل القاموس.");
-  };
-
-  const assessmentGroups = [
-    {
-      key: "age" as const,
-      title: "ما عمر طفلك؟",
-      options: [["6-8","6–8"],["9-12","9–12"],["13-15","13–15"],["16-18","16–18"]]
-    },
-    {
-      key: "interest" as const,
-      title: "ما أكثر مجال يجذب اهتمامه؟",
-      options: [["games","🎮 الألعاب"],["ai","🤖 الذكاء الاصطناعي"],["web","🌐 المواقع والتطبيقات"],["data","📊 البيانات وPython"]]
-    },
-    {
-      key: "level" as const,
-      title: "ما مستوى خبرته الحالية؟",
-      options: [["new","مبتدئ تمامًا"],["basic","جرب Scratch أو أساسيات بسيطة"],["intermediate","لديه خبرة في Python أو مشاريع"]]
-    }
+  const groups = [
+    { key: "age" as const, title: "كم عمر طفلك؟", hint: "نخصص التجربة والمحتوى حسب المرحلة العمرية", options: [["6-8","6–8 سنوات"],["9-12","9–12 سنة"],["13-15","13–15 سنة"],["16-18","16–18 سنة"]] },
+    { key: "interest" as const, title: "ما المجال الذي يحمّسه أكثر؟", hint: "اختر الأقرب لاهتمامه الحالي — ويمكن تغييره لاحقًا", options: [["games","🎮 الألعاب"],["ai","🤖 الذكاء الاصطناعي"],["web","🌐 المواقع والتطبيقات"],["data","📊 البيانات وPython"]] },
+    { key: "level" as const, title: "ما خبرته الحالية؟", hint: "لن نبدأ من الصفر إذا كان لديه أساس جيد", options: [["new","لم يجرّب البرمجة من قبل"],["basic","جرّب Scratch أو أساسيات بسيطة"],["intermediate","لديه خبرة في Python أو مشاريع"]] }
   ];
-
-  const group = assessmentGroups[step - 1];
-
-  const nextAssessment = () => {
-    if (!answers[group.key]) {
-      setNotice("اختر إجابة للمتابعة.");
-      return;
-    }
+  const group = groups[step - 1];
+  const next = () => {
+    if (!answers[group.key]) { setNotice("اختر إجابة واحدة للمتابعة"); return; }
     setNotice("");
-    if (step < 3) setStep(step + 1);
-    else setScreen("profile");
+    if (step < groups.length) setStep(step + 1); else go("profile");
   };
 
-  const nav = (target: Screen) => {
-    setNotice("");
-    setScreen(target);
-  };
-
-  return (
-    <main className="min-h-screen px-4 py-6 md:py-10">
-      <div className="mx-auto mb-4 flex max-w-[430px] items-center justify-between">
-        <div>
-          <div className="font-bold text-slate-900">3C NextGen Prototype</div>
-          <div className="text-xs text-slate-500">Concept product — Arabic Gulf experience</div>
+  return <main className="prototype-page">
+    <header className="site-header">
+      <div className="header-inner">
+        <div className="brand-wrap"><Logo/><div><b>3C NextGen Experience</b><span>تصور تطوير منتج مقترح لـ 3C</span></div></div>
+        <div className="header-actions">
+          <button className="ghost-btn" onClick={() => setPackagesOpen(true)}>الباقات الحالية</button>
+          <button className="ghost-btn" onClick={reset}>إعادة التجربة</button>
         </div>
-        <button onClick={reset} className="rounded-xl border bg-white px-3 py-2 text-sm">إعادة البداية</button>
+      </div>
+    </header>
+
+    <section className="showcase">
+      <div className="showcase-copy">
+        <div className="eyebrow"><Sparkles size={16}/> Learner Experience Concept</div>
+        <h1>من LMS تقليدي إلى <span>رحلة تعلم شخصية</span> تبني مهارات حقيقية</h1>
+        <p>Prototype تفاعلي مبني على مسارات 3C الحالية، مع طبقة AI للتقييم، التخصيص، دعم المدرّس، المشاريع، ورؤية ولي الأمر.</p>
+        <div className="showcase-pills"><span>6–18 سنة</span><span>Live Coding</span><span>Python</span><span>AI & ML</span><span>Game Development</span></div>
+      </div>
+      <button className="concept-board" onClick={() => go("landing")} aria-label="ابدأ تجربة النموذج">
+        <Image src="/3c-concept-ar.jpg" alt="التصور العربي الذي تم اعتماده لشاشات 3C" fill sizes="(max-width: 900px) 100vw, 45vw" priority/>
+        <span className="board-overlay"><Play size={18} fill="currentColor"/> جرّب الشاشات تفاعليًا</span>
+      </button>
+    </section>
+
+    <section className="experience-stage">
+      <div className="stage-meta">
+        <div><span>Interactive Prototype</span><strong>رحلة يوسف — 11 سنة</strong></div>
+        <div className="stage-flow">اكتشاف <ArrowLeft size={14}/> تقييم <ArrowLeft size={14}/> تخصيص <ArrowLeft size={14}/> تعلم <ArrowLeft size={14}/> إنجاز</div>
       </div>
 
       <div className="phone-shell">
-        {screen === "landing" && (
-          <section>
-            <div className="bg-gradient-to-br from-violet-50 via-indigo-50 to-blue-50 p-7 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white">
-                <Code2 size={30}/>
-              </div>
-              <h1 className="text-3xl font-black leading-tight">مستقبل أفضل يبدأ من هنا</h1>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                رحلة تعلم مخصصة في البرمجة والذكاء الاصطناعي للأطفال من 6 إلى 18 سنة.
-              </p>
-              <div className="mt-5 grid grid-cols-3 gap-2 text-xs">
-                <div className="card p-3"><b className="text-base">+120K</b><br/>طالب</div>
-                <div className="card p-3"><b className="text-base">4.8★</b><br/>تقييم</div>
-                <div className="card p-3"><b className="text-base">مصر والخليج</b><br/>انتشار</div>
-              </div>
-              <button onClick={() => nav("assessment")} className="btn-primary mt-6">ابدأ رحلة طفلك الآن</button>
-            </div>
-            <div className="grid grid-cols-2 gap-3 p-5 text-sm">
-              <div className="card p-4"><Gamepad2 className="mb-2 text-brand-600"/>تطوير الألعاب</div>
-              <div className="card p-4"><Brain className="mb-2 text-brand-600"/>الذكاء الاصطناعي</div>
-              <div className="card p-4"><Code2 className="mb-2 text-brand-600"/>تطوير الويب</div>
-              <div className="card p-4"><Sparkles className="mb-2 text-brand-600"/>Python</div>
-            </div>
-          </section>
-        )}
+        {screen === "landing" && <section className="app-screen landing-screen">
+          <div className="landing-hero">
+            <div className="mini-header"><Logo/><span>AR</span></div>
+            <div className="mascot-orb"><Bot size={44}/><span className="orbit-dot one"/><span className="orbit-dot two"/></div>
+            <span className="landing-kicker">3C Online Coding School</span>
+            <h2>مستقبل أفضل<br/>يبدأ من هنا</h2>
+            <p>تعلم البرمجة والذكاء الاصطناعي بطريقة ممتعة، تفاعلية، ومخصصة لطفلك.</p>
+            <div className="metric-grid"><div><b>+120K</b><span>طالب وطالبة</span></div><div><b>4.8 ★</b><span>تقييم أولياء الأمور</span></div><div><b>6–18</b><span>سنة</span></div></div>
+            <button className="primary-btn" onClick={() => go("assessment")}>ابدأ رحلة طفلك <ArrowLeft size={18}/></button>
+            <button className="text-btn" onClick={() => setPackagesOpen(true)}>استكشف الباقات الحالية</button>
+          </div>
+          <div className="benefit-grid"><div><Code2/><span>Live Coding</span></div><div><Gamepad2/><span>مشاريع حقيقية</span></div><div><Brain/><span>AI & ML</span></div><div><Trophy/><span>شهادات ومستويات</span></div></div>
+        </section>}
 
-        {screen === "assessment" && (
-          <section className="p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <b>التقييم المبدئي</b>
-              <span className="text-sm text-slate-500">{step}/3</span>
-            </div>
-            <div className="progress mb-6"><span style={{ width: `${step * 33.33}%` }} /></div>
-            <h2 className="mb-4 text-xl font-bold">{group.title}</h2>
-            <div className={`grid gap-2 ${step < 3 ? "grid-cols-2" : ""}`}>
-              {group.options.map(([value,label]) => {
-                const active = answers[group.key] === value;
-                return (
-                  <button
-                    key={value}
-                    onClick={() => { select(group.key, value); setNotice(""); }}
-                    className={`min-h-14 rounded-2xl border p-3 text-right font-semibold transition ${
-                      active ? "border-brand-600 bg-brand-50 text-brand-700 ring-2 ring-brand-100" : "border-slate-200 bg-white"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mt-4 min-h-6 text-sm text-red-600">{notice}</div>
-            <div className="mt-2 flex gap-2">
-              {step > 1 && <button onClick={() => setStep(step - 1)} className="btn-secondary">السابق</button>}
-              <button onClick={nextAssessment} className="btn-primary">{step === 3 ? "عرض النتيجة" : "التالي"}</button>
-            </div>
-          </section>
-        )}
+        {screen === "assessment" && <section className="app-screen screen-pad">
+          <TopBar title="التقييم الذكي" subtitle="دقيقتان لبناء نقطة بداية أدق" onBack={() => step > 1 ? setStep(step - 1) : go("landing")}/>
+          <div className="step-head"><div className="step-progress"><span style={{width:`${(step / groups.length) * 100}%`}}/></div><span>{step}/{groups.length}</span></div>
+          <div className="assessment-robot"><Bot/><span>خلّيني أتعرف على طفلك 👋</span></div>
+          <h3 className="question-title">{group.title}</h3><p className="question-hint">{group.hint}</p>
+          <div className={`answer-grid ${step === 3 ? "single" : ""}`}>{group.options.map(([value,label]) => <button key={value} className={`answer-card ${answers[group.key] === value ? "selected" : ""}`} onClick={() => { setAnswers(v => ({...v,[group.key]:value})); setNotice(""); }}>{answers[group.key] === value && <CheckCircle2 size={17}/>}<span>{label}</span></button>)}</div>
+          <div className="validation">{notice}</div>
+          <button className="primary-btn" onClick={next}>{step === groups.length ? "أنشئ ملف المتعلم" : "التالي"}<ArrowLeft size={18}/></button>
+        </section>}
 
-        {screen === "profile" && (
-          <section className="p-5">
-            <h2 className="text-2xl font-black">هذا ملف يوسف التعليمي 🎉</h2>
-            <p className="mt-1 text-sm text-slate-500">نتيجة التقييم الذكي — Learner DNA</p>
-            <div className="card mt-5 space-y-4 p-4">
-              <b>ملخص المهارات</b>
-              <Skill label="التفكير المنطقي" value={88}/>
-              <Skill label="الإبداع" value={92}/>
-              <Skill label="حل المشكلات" value={71}/>
-              <Skill label="أساسيات البرمجة" value={64}/>
-            </div>
-            <div className="mt-4 rounded-2xl bg-brand-50 p-4">
-              <span className="text-xs text-slate-500">المسار المقترح</span>
-              <h3 className="mt-1 text-xl font-black text-brand-700">{recommendedTrack}</h3>
-              <p className="mt-2 text-sm leading-6">تم تخصيصه وفق العمر والاهتمامات ومستوى الخبرة.</p>
-            </div>
-            <button onClick={() => nav("path")} className="btn-primary mt-4">عرض المسار المقترح</button>
-          </section>
-        )}
+        {screen === "profile" && <section className="app-screen screen-pad dark-top">
+          <TopBar title="مرحبًا يوسف! 👋" subtitle="هذا ملفك التعليمي المبدئي" onBack={() => go("assessment")}/>
+          <div className="learner-id"><div className="avatar">ي</div><div><b>يوسف • 11 سنة</b><span>Explorer 🚀</span></div><button onClick={() => go("assessment")}>تعديل</button></div>
+          <div className="section-title"><div><span>Skill Snapshot</span><h3>ملف المهارات</h3></div><Sparkles/></div>
+          <div className="skills-card"><Skill label="التفكير المنطقي" value={88} tone="green"/><Skill label="الإبداع" value={92} tone="cyan"/><Skill label="حل المشكلات" value={71} tone="orange"/><Skill label="أساسيات البرمجة" value={64}/><Skill label="مفاهيم الذكاء الاصطناعي" value={35}/></div>
+          <div className="recommend-card"><div className="recommend-icon"><Target/></div><div><span>المسار المقترح</span><h3>{track.title}</h3><p>{track.subtitle}</p></div></div>
+          <button className="primary-btn" onClick={() => go("path")}>عرض مساري الشخصي <ArrowLeft size={18}/></button>
+        </section>}
 
-        {screen === "path" && (
-          <section className="p-5">
-            <div className="mb-5 flex items-start justify-between">
-              <div><h2 className="text-2xl font-black">مساري التعليمي</h2><p className="text-sm text-slate-500">{recommendedTrack}</p></div>
-              <button onClick={() => nav("profile")} className="rounded-xl border px-3 py-2 text-sm">ملفي</button>
-            </div>
-            <div className="space-y-3">
-              <div className="card p-4"><div className="flex justify-between"><b>المستوى 1 — أساسيات Python</b><CheckCircle2 className="text-emerald-500"/></div><p className="mt-1 text-sm text-slate-500">12 درسًا • 3 مشاريع</p></div>
-              <div className="rounded-2xl border-2 border-brand-500 bg-brand-50 p-4">
-                <div className="flex justify-between"><b>المستوى 2 — Python متوسط</b><span className="font-bold text-brand-700">46%</span></div>
-                <p className="mt-1 text-sm text-slate-600">القواميس • الحلقات • الدوال • حل المشكلات</p>
-                <div className="progress mt-3"><span style={{width:"46%"}}/></div>
-              </div>
-              <div className="card p-4 opacity-60"><div className="flex justify-between"><b>المستوى 3 — تطوير الألعاب</b><span>🔒</span></div></div>
-              <div className="card p-4 opacity-60"><div className="flex justify-between"><b>المستوى 4 — الذكاء الاصطناعي</b><span>🔒</span></div></div>
-            </div>
-            <button onClick={() => nav("today")} className="btn-primary mt-5">ابدأ مهام اليوم</button>
-          </section>
-        )}
+        {screen === "path" && <section className="app-screen screen-pad">
+          <TopBar title="مساري التعليمي" subtitle={track.title} onBack={() => go("profile")}/>
+          <div className="ai-banner"><Sparkles/><div><b>AI حدّث خطتك</b><span>أضفنا تدريبًا إضافيًا على Problem Solving بناءً على أدائك.</span></div></div>
+          <div className="level-timeline">
+            <div className="level done"><div className="node"><Check/></div><div><span>المستوى 1</span><b>أساسيات Python</b><small>مكتمل • 12 درسًا • 3 مشاريع</small></div></div>
+            <div className="level current"><div className="node">2</div><div><span>المستوى 2</span><b>Python المتوسط</b><small>6/13 جلسة • قيد التعلم</small><div className="mini-progress"><span style={{width:"46%"}}/></div></div></div>
+            <div className="level locked"><div className="node"><LockKeyhole size={15}/></div><div><span>المستوى 3</span><b>تطوير الألعاب</b><small>يفتح بعد المستوى الحالي</small></div></div>
+            <div className="level locked"><div className="node"><LockKeyhole size={15}/></div><div><span>المستوى 4</span><b>الذكاء الاصطناعي المتقدم</b><small>AI & Machine Learning</small></div></div>
+          </div>
+          <div className="next-class-card"><span>الدرس القادم</span><b>القواميس والمجموعات</b><small>اليوم • 5:00 مساءً</small><button onClick={() => go("today")}>عرض مهام اليوم <ArrowLeft size={16}/></button></div>
+        </section>}
 
-        {screen === "today" && (
-          <section className="p-5">
-            <div className="mb-4 flex justify-between">
-              <div><h2 className="text-2xl font-black">مهامي اليوم</h2><p className="text-sm text-slate-500">استمر يا يوسف 🔥</p></div>
-              <div className="rounded-xl bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700">7 أيام 🔥</div>
-            </div>
-            <div className="card mb-3 p-4">
-              <span className="text-xs text-slate-500">الحصة المباشرة</span>
-              <h3 className="mt-1 font-black">Python متوسط — القواميس</h3>
-              <p className="mt-1 text-sm">5:00 – 6:00 مساءً</p>
-              <button onClick={() => setNotice("تم تجهيز تجربة الحصة المباشرة ✓")} className="btn-primary mt-3">الانضمام للحصة</button>
-              {notice && <p className="mt-2 text-center text-sm text-emerald-600">{notice}</p>}
-            </div>
-            <div className="card mb-3 p-4">
-              <div className="flex justify-between"><b>تحدي صغير</b><span className="text-brand-700">+30 XP</span></div>
-              <p className="mt-1 text-sm text-slate-600">استخدم القواميس لبناء ملف طالب بسيط.</p>
-              <button onClick={() => nav("coach")} className="btn-secondary mt-3">ابدأ التحدي مع المساعد الذكي</button>
-            </div>
-            <div className="card p-4">
-              <div className="flex justify-between"><b>استوديو المشاريع</b><span className="text-brand-700">+50 XP</span></div>
-              <p className="mt-1 text-sm text-slate-600">تابع مشروع لعبة المغامرة الفضائية.</p>
-              <button onClick={() => nav("projects")} className="btn-secondary mt-3">فتح المشروع</button>
-            </div>
-          </section>
-        )}
+        {screen === "today" && <section className="app-screen screen-pad">
+          <TopBar title="مهامي اليوم" subtitle="خطوات صغيرة. مستقبل أكبر." onBack={() => go("path")}/>
+          <div className="streak-card"><div><span>🔥</span><b>7 أيام متتالية</b></div><div><b>1,250</b><span>XP</span></div></div>
+          <div className="mission-card"><div className="mission-head"><span>مهمتك الرئيسية</span><Medal/></div><h3>أكمل تحدي Python لتفتح Badge جديد</h3><div className="mission-progress"><span style={{width:"70%"}}/></div></div>
+          <div className="task-card live"><div className="task-icon"><Play fill="currentColor"/></div><div className="task-copy"><span>حصة مباشرة • بعد ساعتين</span><b>Python المتوسط</b><small>القواميس والمجموعات • 5:00 م</small></div><button onClick={() => setNotice("✓ تم تجهيز رابط الحصة التجريبية")}>انضم</button></div>
+          <div className="task-card"><div className="task-icon orange"><Target/></div><div className="task-copy"><span>15 دقيقة • +30 XP</span><b>Mini Challenge</b><small>تحدي سريع على Dictionaries</small></div><button onClick={() => go("coach")}>ابدأ</button></div>
+          <div className="task-card"><div className="task-icon cyan"><Rocket/></div><div className="task-copy"><span>استوديو المشاريع</span><b>Simple Calculator</b><small>تابع مشروعك الحالي</small></div><button onClick={() => go("projects")}>افتح</button></div>
+          {notice && <div className="success-note">{notice}</div>}
+        </section>}
 
-        {screen === "coach" && (
-          <section className="p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div><h2 className="text-2xl font-black">مساعد 3C الذكي 🤖</h2><p className="text-sm text-slate-500">يعلمك ولا يعطيك الحل مباشرة</p></div>
-              <button onClick={() => nav("today")} className="rounded-xl border p-2"><ArrowLeft size={18}/></button>
-            </div>
-            <pre className="overflow-x-auto rounded-2xl bg-slate-950 p-4 text-left text-sm text-slate-100" dir="ltr">{`student = {\n  "name": "Youssef",\n  "age": 11\n}\n\nprint(student["ag"])`}</pre>
-            <div className="mt-3 rounded-2xl bg-brand-50 p-4 text-sm leading-7">{coachText}</div>
-            <div className="mt-3 grid gap-2">
-              <button onClick={() => setCoachText("تلميح: راجع الحروف الموجودة بين علامتي الاقتباس داخل القاموس ثم قارنها بما كتبته في print().")} className="btn-secondary"><Lightbulb className="ml-2 inline" size={18}/>أعطني تلميحًا</button>
-              <button onClick={() => setCoachText("القاموس في Python يخزن البيانات بصيغة Key وValue. يجب استخدام نفس الـKey بالضبط عند استرجاع القيمة.")} className="btn-secondary"><Brain className="ml-2 inline" size={18}/>اشرح لي المفهوم</button>
-              <button onClick={() => setCoachText("مثال مشابه: user = {'name':'Ali'} ثم print(user['name']). جرّب تطبيق الفكرة على الكود الخاص بك.")} className="btn-secondary"><Code2 className="ml-2 inline" size={18}/>أعطني مثالًا مشابهًا</button>
-              <button onClick={() => setCoachText("أحسنت يا يوسف! 🎉 تم حل الخطأ وحصلت على +30 XP.")} className="btn-primary">تم الحل ✓</button>
-            </div>
-          </section>
-        )}
+        {screen === "coach" && <section className="app-screen screen-pad">
+          <TopBar title="مساعد 3C الذكي" subtitle="يساعدك تفكّر — لا يعطيك الحل" onBack={() => go("today")}/>
+          <div className="coach-intro"><div className="bot-avatar"><Bot/></div><p>أرى أنك تعمل على Dictionary. جرّب نحل المشكلة سويًا خطوة بخطوة.</p></div>
+          <pre className="code-editor" dir="ltr"><code>{`student = {\n  "name": "Youssef",\n  "age": 11\n}\n\nprint(student["ag"])`}</code><span className="error-line">السطر 6</span></pre>
+          <div className="coach-response"><Lightbulb/><p>{coachText}</p></div>
+          <div className="coach-actions"><button onClick={() => setCoachText("تلميح: قارن كلمة ag بالمفاتيح المكتوبة داخل student. هل هناك حرف ناقص؟")}>💡 أعطني تلميحًا</button><button onClick={() => setCoachText("Dictionary يخزن البيانات كـ Key وValue. عند القراءة يجب استخدام نفس اسم الـKey بالضبط.")}>📘 اشرح المفهوم</button><button onClick={() => setCoachText("مثال: user = {'name':'Ali'} ثم print(user['name']). طبّق الفكرة على age.")}>🧪 مثال مشابه</button><button className="solve" onClick={() => setCoachText("أحسنت! 🎉 صححت المفتاح إلى age وحصلت على +30 XP.")}>تم الحل ✓</button></div>
+        </section>}
 
-        {screen === "projects" && (
-          <section className="p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div><h2 className="text-2xl font-black">مشاريعي</h2><p className="text-sm text-slate-500">ابنِ ملف أعمال حقيقي</p></div>
-              <Rocket className="text-brand-600"/>
-            </div>
-            <div className="space-y-3">
-              <div className="card p-4">
-                <div className="flex justify-between"><b>🚀 مغامرة فضائية</b><span className="text-sm text-brand-700">قيد العمل</span></div>
-                <p className="mt-1 text-sm text-slate-500">لعبة 2D باستخدام Pygame</p>
-                <div className="progress mt-3"><span style={{width:"60%"}}/></div>
-                <button onClick={() => setNotice("المرحلة التالية: إضافة المؤثرات الصوتية للمشروع ✓")} className="btn-secondary mt-3">متابعة المشروع</button>
-              </div>
-              <div className="card p-4"><div className="flex justify-between"><b>🤖 مصنف الصور بالذكاء الاصطناعي</b><CheckCircle2 className="text-emerald-500"/></div><p className="mt-1 text-sm text-slate-500">Teachable Machine</p></div>
-              <div className="card p-4"><div className="flex justify-between"><b>🌐 موقعي الأول</b><CheckCircle2 className="text-emerald-500"/></div><p className="mt-1 text-sm text-slate-500">HTML • CSS • JavaScript</p></div>
-            </div>
-            {notice && <p className="mt-3 text-sm text-emerald-600">{notice}</p>}
-            <button onClick={() => nav("parent")} className="btn-primary mt-5">عرض تقدم يوسف لولي الأمر</button>
-          </section>
-        )}
+        {screen === "projects" && <section className="app-screen screen-pad">
+          <TopBar title="استوديو المشاريع" subtitle="من التعلم إلى إنجاز يمكن عرضه" onBack={() => go("today")}/>
+          <div className="portfolio-head"><div><span>My Portfolio</span><b>3 مشاريع</b></div><div><Trophy/><b>450 XP</b></div></div>
+          <div className="project featured"><div className="project-visual space"><Rocket/></div><div className="project-body"><div className="project-status">قيد العمل</div><h3>مغامرة فضائية</h3><p>لعبة 2D باستخدام Pygame</p><div className="milestones"><span>✓ Game mechanics</span><span>✓ Level design</span><span className="active">● Sound effects</span><span>○ Final testing</span></div><button onClick={() => setNotice("الخطوة التالية: إضافة المؤثرات الصوتية ثم Final Testing")}>متابعة المشروع</button></div></div>
+          <div className="project-row"><div className="project-thumb ai"><Brain/></div><div><b>مصنف الصور بالذكاء الاصطناعي</b><span>Teachable Machine • مكتمل</span></div><CheckCircle2/></div>
+          <div className="project-row"><div className="project-thumb web"><Code2/></div><div><b>موقعي الأول</b><span>HTML, CSS, JavaScript • مكتمل</span></div><CheckCircle2/></div>
+          {notice && <div className="success-note">{notice}</div>}
+          <button className="primary-btn" onClick={() => go("parent")}>كيف يرى ولي الأمر التقدم؟ <ArrowLeft size={18}/></button>
+        </section>}
 
-        {screen === "parent" && (
-          <section className="p-5">
-            <div className="mb-4 flex items-start justify-between">
-              <div><h2 className="text-2xl font-black">لوحة ولي الأمر</h2><p className="text-sm text-slate-500">تقدم يوسف هذا الشهر</p></div>
-              <UsersRound className="text-brand-600"/>
-            </div>
-            <div className="mb-4 grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="card p-3"><b className="text-xl">92%</b><br/>الحضور</div>
-              <div className="card p-3"><b className="text-xl">12س</b><br/>وقت التعلم</div>
-              <div className="card p-3"><b className="text-xl">+18%</b><br/>نمو المهارات</div>
-            </div>
-            <div className="card space-y-4 p-4">
-              <b>تطور المهارات</b>
-              <Skill label="التفكير المنطقي" value={88}/>
-              <Skill label="Python" value={64}/>
-              <Skill label="حل المشكلات" value={71}/>
-              <Skill label="الإبداع" value={92}/>
-            </div>
-            <div className="mt-4 rounded-2xl bg-brand-50 p-4">
-              <div className="flex items-center gap-2 font-black"><Bot size={19}/>رؤية الذكاء الاصطناعي</div>
-              <p className="mt-2 text-sm leading-7">يوسف يظهر إبداعًا قويًا وتطورًا ملحوظًا في التفكير المنطقي. نوصي بزيادة المشاريع العملية في تطوير الألعاب خلال الشهر القادم.</p>
-              <button onClick={() => setNotice("التوصية القادمة: مشروع Game Development مصغر + جلسة مراجعة Python.")} className="btn-secondary mt-3">عرض التوصية القادمة</button>
-              {notice && <p className="mt-3 text-sm text-brand-700">{notice}</p>}
-            </div>
-          </section>
-        )}
+        {screen === "parent" && <section className="app-screen screen-pad">
+          <TopBar title="لوحة ولي الأمر" subtitle="صورة واضحة عن القيمة والتطور" onBack={() => go("projects")}/>
+          <div className="parent-summary"><div className="avatar">ي</div><div><b>تقدم يوسف</b><span>هذا الشهر</span></div><Star fill="currentColor"/></div>
+          <div className="parent-metrics"><div><b>92%</b><span>الحضور</span></div><div><b>12س 30د</b><span>وقت التعلم</span></div><div><b>+18%</b><span>نمو المهارات</span></div></div>
+          <div className="section-title"><div><span>Skill Development</span><h3>تطور المهارات</h3></div><BarChart3/></div>
+          <div className="skills-card"><Skill label="التفكير المنطقي" value={88} tone="green"/><Skill label="Python" value={64}/><Skill label="حل المشكلات" value={71} tone="orange"/><Skill label="الإبداع" value={92} tone="cyan"/><Skill label="مفاهيم الذكاء الاصطناعي" value={35}/></div>
+          <div className="parent-insight"><div className="insight-icon"><Sparkles/></div><div><b>رؤية الذكاء الاصطناعي</b><p>يوسف يظهر إبداعًا قويًا ونموًا جيدًا في التفكير المنطقي. نوصي بمشروع Game Development صغير لترسيخ Python.</p></div></div>
+          <button className="secondary-btn" onClick={() => setNotice("التوصية القادمة: مشروع Pygame لمدة أسبوعين + جلسة مراجعة Python")}>عرض التوصية القادمة</button>
+          {notice && <div className="success-note">{notice}</div>}
+        </section>}
 
-        {screen !== "landing" && screen !== "assessment" && (
-          <nav className="grid grid-cols-4 border-t bg-white p-2 text-center text-[11px]">
-            <button onClick={() => nav("today")} className={`rounded-xl p-2 ${screen==="today"?"bg-brand-50 text-brand-700":"text-slate-500"}`}><Home className="mx-auto mb-1" size={18}/>الرئيسية</button>
-            <button onClick={() => nav("path")} className={`rounded-xl p-2 ${screen==="path"?"bg-brand-50 text-brand-700":"text-slate-500"}`}><Sparkles className="mx-auto mb-1" size={18}/>المسار</button>
-            <button onClick={() => nav("projects")} className={`rounded-xl p-2 ${screen==="projects"?"bg-brand-50 text-brand-700":"text-slate-500"}`}><Trophy className="mx-auto mb-1" size={18}/>المشاريع</button>
-            <button onClick={() => nav("parent")} className={`rounded-xl p-2 ${screen==="parent"?"bg-brand-50 text-brand-700":"text-slate-500"}`}><UserRound className="mx-auto mb-1" size={18}/>ولي الأمر</button>
-          </nav>
-        )}
+        {screen !== "landing" && screen !== "assessment" && <nav className="bottom-nav"><button className={screen === "today" ? "active" : ""} onClick={() => go("today")}><Home/><span>الرئيسية</span></button><button className={screen === "path" ? "active" : ""} onClick={() => go("path")}><Target/><span>المسار</span></button><button className={screen === "projects" ? "active" : ""} onClick={() => go("projects")}><Rocket/><span>المشاريع</span></button><button className={screen === "parent" ? "active" : ""} onClick={() => go("parent")}><UserRound/><span>ولي الأمر</span></button></nav>}
       </div>
 
-      <p className="mx-auto mt-4 max-w-[430px] text-center text-xs text-slate-500">
-        Prototype UX — بيانات تجريبية، بدون Backend أو حسابات حقيقية.
-      </p>
-    </main>
-  );
+      <div className="stage-side">
+        <span className="side-label">ما الذي يتغير؟</span>
+        <h3>نحافظ على الـ LMS الحالي، ونضيف فوقه طبقة تجربة ذكية.</h3>
+        <div className="side-points"><div><Brain/><span><b>Learner DNA</b> بدل مجرد Level</span></div><div><Sparkles/><span><b>Adaptive Practice</b> حول الـCurriculum الأساسي</span></div><div><Bot/><span><b>AI Coding Coach</b> يوجّه بدل إعطاء الإجابة</span></div><div><UsersRound/><span><b>Parent Intelligence</b> لقياس القيمة والـRetention</span></div></div>
+        <button className="outline-btn" onClick={() => setPackagesOpen(true)}>عرض الباقات الفعلية المستخدمة في التصور</button>
+      </div>
+    </section>
+
+    <section className="product-layer">
+      <span className="section-kicker">Existing → Enhancement → AI Layer</span><h2>التطوير المقترح بدون هدم النظام الحالي</h2>
+      <div className="layer-grid"><article><span>01</span><h3>Existing LMS</h3><p>Courses, Live Sessions, Attendance, Quizzes, Payments, Certificates.</p></article><article><span>02</span><h3>Experience Layer</h3><p>Today, Skill Map, Project Studio, Parent Dashboard, Gamification.</p></article><article className="highlight"><span>03</span><h3>AI Layer</h3><p>Assessment, Personalization, Coding Coach, Risk Detection, Instructor Copilot.</p></article></div>
+    </section>
+
+    <footer><div><Logo/><span>Concept prototype — ليس منتجًا رسميًا منشورًا من 3C</span></div><span>Designed for Egypt & GCC learner experience</span></footer>
+
+    {packagesOpen && <div className="modal-backdrop" onClick={() => setPackagesOpen(false)}><div className="packages-modal" onClick={e => e.stopPropagation()}><button className="close-modal" onClick={() => setPackagesOpen(false)}><X/></button><span className="section-kicker">Actual 3C Packages</span><h2>الباقات المستخدمة داخل التصور</h2><p className="modal-sub">الأسعار بالجنيه المصري كما ظهرت في الـProduct Audit. يمكن تكييف تجربة العرض للسعودية والخليج مع الحفاظ على منطق المستويات.</p><div className="package-grid">{packages.map(p => <button key={p.name} className={`package-card ${selectedPackage === p.name ? "selected" : ""}`} onClick={() => setSelectedPackage(p.name)}><div className="package-badge">{p.badge}</div><h3>{p.name}</h3><div className="package-meta"><span>{p.months}</span><span>{p.levels}</span></div><div className="price"><b>{p.price}</b><span>EGP</span><del>{p.old}</del></div><ul><li><Check/> Live Sessions</li><li><Check/> Assessments & Quizzes</li><li><Check/> Technical Guidance</li><li><Check/> Graduation Projects</li><li><Check/> Certificate</li></ul><div className="package-select">{selectedPackage === p.name ? "محدد للتجربة ✓" : "اختيار الباقة"}</div></button>)}</div><button className="primary-btn modal-cta" onClick={() => {setPackagesOpen(false); go("assessment");}}>جرّب كيف نوصي بالمسار قبل البيع <ArrowLeft size={18}/></button></div></div>}
+  </main>;
 }
