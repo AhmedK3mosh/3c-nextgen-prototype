@@ -1,6 +1,7 @@
 import "./globals.css";
 import "./hero-exact.css";
 import "./polish.css";
+import "./reference-v3.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
