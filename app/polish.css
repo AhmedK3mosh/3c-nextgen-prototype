@@ -1,0 +1,36 @@
+/* 3C premium product polish layer */
+:root{--surface:#fff;--surface-soft:#f7faff;--shadow-sm:0 6px 18px rgba(7,27,92,.07);--shadow-md:0 16px 36px rgba(7,27,92,.11);--radius-lg:18px;--ease:cubic-bezier(.2,.8,.2,1)}
+body{background:radial-gradient(circle at 50% 0,#f8fbff 0,#edf4fb 46%,#e8f0f8 100%)}
+.demo-page{padding:24px 14px 42px;align-items:flex-start;background:radial-gradient(circle at 50% 12%,rgba(35,196,242,.10),transparent 28%),linear-gradient(180deg,#f7fbff,#edf3fa 62%,#e9f1f8)}
+.phone{width:min(100%,402px);min-height:820px;border:6px solid #07132f;border-radius:42px;box-shadow:0 36px 90px rgba(6,28,77,.22),0 3px 0 rgba(255,255,255,.65) inset;transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.phone-body{min-height:708px}.notch{top:8px;width:112px;height:27px;background:#061128}
+.blue-btn{min-height:52px;border-radius:16px;font-size:13px;background:linear-gradient(135deg,#0869ff,#1687ff);box-shadow:0 12px 28px rgba(15,111,255,.28);transition:transform .18s var(--ease),box-shadow .18s var(--ease),filter .18s var(--ease)}
+.blue-btn:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(15,111,255,.34);filter:saturate(1.08)}.blue-btn:active{transform:translateY(0) scale(.985)}
+.card,.whats-next,.project-card,.mission-card,.parent-section,.recommended-card{box-shadow:var(--shadow-sm);border-color:#e5ebf5!important;transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease)}
+.card:hover,.project-card:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(7,27,92,.09)}
+.bottom-nav{height:70px;border-top:1px solid #e6edf6;box-shadow:0 -10px 26px rgba(11,38,90,.045);padding:7px 5px 9px}.bottom-nav a{border-radius:13px;transition:all .18s var(--ease)}.bottom-nav a.active{background:#eef6ff;color:#086dff}.bottom-nav a:active{transform:scale(.94)}
+.screen-title h1{font-size:19px;letter-spacing:-.25px}.subhead{font-size:11.5px}.avatar{box-shadow:0 5px 14px rgba(10,57,123,.12);border:2px solid #fff}
+/* Landing: premium, focused, conversion-oriented */
+.landing-screen{padding:11px 18px 25px;min-height:748px;background:radial-gradient(circle at 82% 12%,rgba(32,201,239,.13),transparent 26%),radial-gradient(circle at 12% 48%,rgba(76,99,255,.08),transparent 26%),linear-gradient(180deg,#fff 0,#f9fcff 66%,#fff 100%)}
+.landing-top{padding-top:1px}.lang-btn{height:36px;border-radius:13px;padding:0 12px;background:rgba(255,255,255,.88);box-shadow:0 6px 16px rgba(7,27,92,.06);transition:all .18s var(--ease)}.lang-btn:hover{border-color:#a9cdfd;transform:translateY(-1px)}
+.landing-copy{margin-top:20px}.landing-copy h1{font-size:36px;line-height:.94;letter-spacing:-1.9px;max-width:330px}.landing-copy p{font-size:12.5px;line-height:1.65;max-width:292px;color:#5c6c8b}
+.landing-cta{margin-top:-4px;position:relative;z-index:10}.landing-stats{margin-top:15px;padding:10px 4px 2px;border-radius:16px;background:rgba(247,250,255,.78);border:1px solid #edf2f8}.landing-stats b{font-size:10.5px}.landing-stats span{font-size:8.2px}
+/* Assessment */
+.assessment-screen>h1{font-size:27px;letter-spacing:-.5px}.interest-grid button,.age-grid button,.choice-stack button{transition:all .18s var(--ease)}.interest-grid button:hover,.age-grid button:hover,.choice-stack button:hover{transform:translateY(-1px);border-color:#9fc8ff}.interest-grid button.selected{box-shadow:0 8px 18px rgba(14,117,255,.10)}
+/* Learner profile */
+.profile-identity{border-radius:18px;padding:13px;background:radial-gradient(circle at 90% 10%,rgba(41,203,243,.26),transparent 30%),linear-gradient(145deg,#09266b,#1248a4);box-shadow:0 14px 30px rgba(9,42,105,.20)}
+.skill-track{height:6px}.skill-track i{transition:width .7s var(--ease)}.chips span{padding:6px 10px;background:#edf5ff;border:1px solid #dbeaff}
+/* Path */
+.level-dot{box-shadow:0 5px 14px rgba(20,59,120,.12)}.level-item.current .level-dot{box-shadow:0 0 0 7px #e4efff,0 8px 18px rgba(9,109,255,.22)}.tabs button{transition:color .18s var(--ease),background .18s var(--ease)}
+/* Mission */
+.today-screen{background:linear-gradient(180deg,#fff 0,#fbfdff 100%)}.mission-hero{border-radius:18px!important;box-shadow:var(--shadow-sm)}
+/* Coach */
+.coach-screen{background:linear-gradient(180deg,#f9fcff,#fff 34%)}.coach-screen pre{border-radius:16px!important;box-shadow:0 12px 28px rgba(2,12,34,.17)}
+/* Projects + parent */
+.project-card{overflow:hidden;border-radius:17px!important}.parent-screen .skill-track{height:6px}.parent-screen{background:linear-gradient(180deg,#fff,#fbfdff)}
+/* Keyboard/focus accessibility */
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(14,117,255,.28);outline-offset:3px}
+/* responsive presentation */
+@media(min-width:900px){.demo-page{padding-top:32px}.phone:hover{box-shadow:0 42px 100px rgba(6,28,77,.24)}}
+@media(max-width:430px){.demo-page{padding:0;background:#fff}.phone{width:100%;min-height:100dvh;border:0;border-radius:0;box-shadow:none}.notch{display:none}.status-bar{height:32px;padding-top:9px}.phone-body{min-height:calc(100dvh - 102px)}.landing-screen{min-height:calc(100dvh - 32px)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
